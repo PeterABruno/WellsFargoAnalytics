@@ -1,0 +1,417 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Wellsfargoanalytics by PeterABruno</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Wellsfargoanalytics</h1>
+        <p>Analysis of social media content</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/PeterABruno/WellsFargoAnalytics" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/PeterABruno/WellsFargoAnalytics/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/PeterABruno/WellsFargoAnalytics/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h3>
+<a id="background" class="anchor" href="#background" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background</h3>
+
+<p>Wells Fargo provided us with a dataset containing social media posts from Twitter and Facebook. Our team was tasked with cleaning, and analyzing the data, then providing business insights based on the results. My teammates Alex and Kaya were the coders, while Zach and I analyzed and delivered the insights. With our team divided into two roles, communication between the coders and analysts were vital so the data they were mining for was coordinated with what business aspects we wanted to examine.
+<img alt=""></p>
+
+<h3>
+<a id="methodology" class="anchor" href="#methodology" aria-hidden="true"><span class="octicon octicon-link"></span></a>Methodology</h3>
+
+<p>We took the dataset which was given to us, then created a smaller data frame and analyze those posts making inferences about the larger population. From this smaller data frame we cleaned the data to extract the nonsensical words which would be of zero value to us in our analysis. All this code is under “Part A” under the Code portion.</p>
+
+<h4>
+<a id="uncleaned-data" class="anchor" href="#uncleaned-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Uncleaned data:</h4>
+
+<p><img src="http://i.imgur.com/hDTQPM9.png" alt=""></p>
+
+<h4>
+<a id="cleaned-data" class="anchor" href="#cleaned-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cleaned data:</h4>
+
+<p><img src="http://i.imgur.com/vSTViUx.png" alt="">
+From this, we used lists of positive and negative words and matched those words to text in the social media posts. A sentiment score for each post was calculated by the number of positive words minus the negative words. Very positive and very negative posts were defined as the score being &gt;= 2 or &lt;= 2 respectively. This data frame was further divided this into data frames for posts mentioning each bank respectively. Also, we made a data frame for posts containing "name". Finally, we ran the sentiment analysis on these subsets and calculated their scores and made graphs.
+Additionally, from the sample database, we created 10 word clouds, one "very positive" and one "very negative" for each bank and then the same thing for all four banks combined, demonstrating what conversations were taking in regards to the banks. </p>
+
+<p>POSTS → 1000 Post DF → Smaller DFs of Posts → Sentiment Analysis</p>
+
+<p><img src="http://i.imgur.com/GD93wxf.png" alt=""></p>
+
+<h3>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data</h3>
+
+<p>Part A: Cleaning of the Data
+``` R df = read.table('dataset.txt',sep="|",header=T)
+df$FullText = as.character(df$FullText)</p>
+
+<h5>
+<a id="remove-non-ascii-characters" class="anchor" href="#remove-non-ascii-characters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Remove non-ascii characters</h5>
+
+<p>df.texts.clean = as.data.frame(iconv(df$FullText, "latin1", "ASCII", sub=""))
+colnames(df.texts.clean) = 'FullText'</p>
+
+<p>df$FullText = df.texts.clean$FullText</p>
+
+<h5>
+<a id="test-10000-texts-good-sample-size" class="anchor" href="#test-10000-texts-good-sample-size" aria-hidden="true"><span class="octicon octicon-link"></span></a>test 10,000 texts: good sample size</h5>
+
+<p>idx.10000 = sample(1:nrow(df),10000)
+df.10000 = df[idx.10000,]</p>
+
+<p>df.entire = df
+df = df.10000</p>
+
+<h5>
+<a id="load-using-the-tm-library" class="anchor" href="#load-using-the-tm-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Load using the tm library</h5>
+
+<p>library(tm) 
+docs &lt;- Corpus(DataframeSource(as.data.frame(df[,6])))   </p>
+
+<h5>
+<a id="remember-it-matters-the-order-in-which-tm_map-expressions-are-run" class="anchor" href="#remember-it-matters-the-order-in-which-tm_map-expressions-are-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>REMEMBER: IT MATTERS THE ORDER IN WHICH TM_MAP EXPRESSIONS ARE RUN</h5>
+
+<p>library(rJava)
+docs &lt;- tm_map(docs, content_transformer(tolower)) # convert to lowercase first
+docs &lt;- tm_map(docs, removeWords, stopwords('english'))
+docs &lt;- tm_map(docs, removeWords, stopwords(kind = "SMART"))</p>
+
+<h5>
+<a id="metadatarecurrent-words" class="anchor" href="#metadatarecurrent-words" aria-hidden="true"><span class="octicon octicon-link"></span></a>metaData/recurrent words</h5>
+
+<p>myMeta &lt;- c("name","bank","banka","bankb","bankc", "bankd", "banke",
+            "internet","https", "rettwit", "twithndl", "twit_hndl_banka",
+            "twit_hndl_bankb","twit_hndl_bankc","twit_hndl_bankd", "phone",
+            "dirmsg", "street","name_resp","bankds", "and", "for", "the", "you",
+            "twithndlbanka","dir_msg","ret_twit","twit_hndl")
+docs &lt;- tm_map(docs, removeWords, myMeta)
+docs &lt;- tm_map(docs, stripWhitespace)
+docs &lt;- tm_map(docs, removePunctuation)
+docs &lt;- tm_map(docs, PlainTextDocument)</p>
+
+<p>dtm &lt;- DocumentTermMatrix(bankA.docs)
+dtm = removeSparseTerms(dtm, 0.98)</p>
+
+<h5>
+<a id="creates-new-data-frame-out-of-cleanedprocessed-text" class="anchor" href="#creates-new-data-frame-out-of-cleanedprocessed-text" aria-hidden="true"><span class="octicon octicon-link"></span></a>creates new data frame out of cleaned/processed text</h5>
+
+<p>new.df &lt;-data.frame(text=unlist(sapply(dtm, <code>[</code>, "content")), stringsAsFactors=F)</p>
+
+<h5>
+<a id="this-ends-preprocessing" class="anchor" href="#this-ends-preprocessing" aria-hidden="true"><span class="octicon octicon-link"></span></a>THIS ENDS PREPROCESSING</h5>
+
+<p>bankA.idx = which(sapply(df$FullText,function(x) grepl("BankA",x)))
+bankB.idx = which(sapply(df$FullText,function(x) grepl("BankB",x)))
+bankC.idx = which(sapply(df$FullText,function(x) grepl("BankC",x)))
+bankD.idx = which(sapply(df$FullText,function(x) grepl("BankD",x)))</p>
+
+<p>df$BankID = vector(mode="numeric",length = nrow(df))
+df$BankID[bankA.idx] = "BankA"
+df$BankID[bankB.idx] = "BankB"
+df$BankID[bankC.idx] = "BankC"
+df$BankID[bankD.idx] = "BankD"</p>
+
+<p>bankA.docs = docs[bankA.idx]
+bankB.docs = docs[bankB.idx]
+bankC.docs = docs[bankC.idx]
+bankD.docs = docs[bankD.idx] </p>
+
+<p>dtm &lt;- DocumentTermMatrix(bankA.docs)
+dtm = removeSparseTerms(dtm, 0.98)</p>
+
+<h6>
+<a id="creates-new-data-frame-out-of-cleanedprocessed-text-1" class="anchor" href="#creates-new-data-frame-out-of-cleanedprocessed-text-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>creates new data frame out of cleaned/processed text</h6>
+
+<p>new.df &lt;-data.frame(text=unlist(sapply(dtm, <code>[</code>, "content")), stringsAsFactors=F) #Posts that have been cleaned</p>
+
+<p>findFreqTerms(dtm,300)</p>
+
+<p>freq &lt;- colSums(as.matrix(dtm))<br>
+freq
+ord &lt;- order(freq)   </p>
+
+<p>library(wordcloud)
+wordcloud(names(freq), freq, colors=brewer.pal(8, "Dark2"))</p>
+
+<p>Sentiment Analysis Code</p>
+
+<h1>
+<a id="since-we-cant-find-a-great-package-in-r-im-going-to-use-an" class="anchor" href="#since-we-cant-find-a-great-package-in-r-im-going-to-use-an" aria-hidden="true"><span class="octicon octicon-link"></span></a>Since we can't find a great package in R, I'm going to use an</h1>
+
+<h1>
+<a id="example-i-found-online-to-build-our-own" class="anchor" href="#example-i-found-online-to-build-our-own" aria-hidden="true"><span class="octicon octicon-link"></span></a>example I found online to build our own</h1>
+
+<h1>
+<a id="based-on-httpwwwihubcokeblogs23216" class="anchor" href="#based-on-httpwwwihubcokeblogs23216" aria-hidden="true"><span class="octicon octicon-link"></span></a>Based on: <a href="http://www.ihub.co.ke/blogs/23216">http://www.ihub.co.ke/blogs/23216</a>
+</h1>
+
+<h1>
+<a id="only-need-to-do-once" class="anchor" href="#only-need-to-do-once" aria-hidden="true"><span class="octicon octicon-link"></span></a>Only need to do once</h1>
+
+<h1>
+<a id="download-and-upload-httpwwwcsuiceduliubfbsopinion-lexicon-englishrar" class="anchor" href="#download-and-upload-httpwwwcsuiceduliubfbsopinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download and upload: <a href="http://www.cs.uic.edu/%7Eliub/FBS/opinion-lexicon-English.rar">http://www.cs.uic.edu/~liub/FBS/opinion-lexicon-English.rar</a>
+</h1>
+
+<h1>
+<a id="systemunrar-e-opinion-lexicon-englishrar" class="anchor" href="#systemunrar-e-opinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>system('unrar e opinion-lexicon-English.rar')</h1>
+
+<p>pos &lt;- scan('positive-words.txt',what='character',comment.char=';')
+neg &lt;- scan('negative-words.txt',what='character',comment.char=';')</p>
+
+<p>score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
+{
+  require(plyr)
+  require(stringr)</p>
+
+<p># we got a vector of sentences. plyr will handle a list
+  # or a vector as an "l" for us
+  # we want a simple array ("a") of scores back, so we use 
+  # "l" + "a" + "ply" = "laply":
+  scores = laply(sentences, function(sentence, pos.words, neg.words) {</p>
+
+<pre><code># clean up sentences with R's regex-driven global substitute, gsub():
+sentence = gsub('[[:punct:]]', '', sentence)
+sentence = gsub('[[:cntrl:]]', '', sentence)
+sentence = gsub('\\d+', '', sentence)
+# and convert to lower case:
+sentence = tolower(sentence)
+
+# split into words. str_split is in the stringr package
+word.list = str_split(sentence, '\\s+')
+# sometimes a list() is one level of hierarchy too much
+words = unlist(word.list)
+
+# compare our words to the dictionaries of positive &amp; negative terms
+pos.matches = match(words, pos.words)
+neg.matches = match(words, neg.words)
+
+# match() returns the position of the matched term or NA
+# we just want a TRUE/FALSE:
+pos.matches = !is.na(pos.matches)
+neg.matches = !is.na(neg.matches)
+
+# and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():
+score = sum(pos.matches) - sum(neg.matches)
+
+return(score)
+</code></pre>
+
+<p>}, pos.words, neg.words, .progress=.progress )</p>
+
+<p>scores.df = data.frame(score=scores, text=sentences)
+  return(scores.df)
+}</p>
+
+<h1>
+<a id="breaks-data-frame-into-manageable-size" class="anchor" href="#breaks-data-frame-into-manageable-size" aria-hidden="true"><span class="octicon octicon-link"></span></a>breaks data frame into manageable size</h1>
+
+<p>df.1000$FullText = as.character(df.1000$FullText)</p>
+
+<h1>
+<a id="subsets-data-frame-into-posts-that-mention-bank-a-name-etc" class="anchor" href="#subsets-data-frame-into-posts-that-mention-bank-a-name-etc" aria-hidden="true"><span class="octicon octicon-link"></span></a>subsets data frame into posts that mention Bank A, “name”, etc</h1>
+
+<p>df.bankA = df.1000[bankA.idx,]
+df.bankB = df.1000[bankB.idx,]
+df.bankC = df.1000[bankC.idx,]
+df.bankD = df.1000[bankD.idx,]
+df.names = df.1000[name.idx,]
+df.internet = df.1000[internet.idx,]</p>
+
+<h1>
+<a id="sets-the-data-frame-whose-scores-we-will-calculate" class="anchor" href="#sets-the-data-frame-whose-scores-we-will-calculate" aria-hidden="true"><span class="octicon octicon-link"></span></a>sets the data frame whose scores we will calculate</h1>
+
+<p>df.sent = df.names</p>
+
+<p>scores = score.sentiment(df.sent$FullText, pos, neg, .progress='text')
+scores$very.pos = as.numeric(scores$score &gt;= 2)
+scores$very.neg = as.numeric(scores$score &lt;= -2)</p>
+
+<h1>
+<a id="how-many-very-positives-and-very-negatives" class="anchor" href="#how-many-very-positives-and-very-negatives" aria-hidden="true"><span class="octicon octicon-link"></span></a>how many very positives and very negatives</h1>
+
+<p>numpos = sum(scores$very.pos)
+numneg = sum(scores$very.neg)</p>
+
+<h1>
+<a id="global-score" class="anchor" href="#global-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>global score</h1>
+
+<p>global_score = round( 100 * numpos / (numpos + numneg) )</p>
+
+<p>scores$mediatype = df.sent$MediaType</p>
+
+<h1>
+<a id="colors" class="anchor" href="#colors" aria-hidden="true"><span class="octicon octicon-link"></span></a>colors</h1>
+
+<p>cols = c("#7CAE00", "#00BFC4")
+names(cols) = c("twitter", "facebook")</p>
+
+<h1>
+<a id="boxplot" class="anchor" href="#boxplot" aria-hidden="true"><span class="octicon octicon-link"></span></a>boxplot</h1>
+
+<p>library(ggplot2)
+ggplot(scores, aes(x=mediatype, y=score, group=mediatype)) +
+  geom_boxplot(aes(fill=mediatype)) +
+  scale_fill_manual(values=cols) +
+  geom_jitter(colour="gray40",position=position_jitter(width=0.2), alpha=0.3) +
+  labs(title = "Media Type's Sentiment Scores: Text including 'name'") + 
+  xlab('Media Type') + ylab('Sentiment Score')</p>
+
+<h1>
+<a id="barplot-of-average-score" class="anchor" href="#barplot-of-average-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average score</h1>
+
+<p>meanscore = tapply(scores$score, scores$mediatype, mean)
+df.plot = data.frame(mediatype=names(meanscore), meanscore=meanscore)
+df.plot$mediatypes &lt;- reorder(df.plot$mediatype, df.plot$meanscore)</p>
+
+<p>ggplot(df.plot, aes(x = factor(mediatypes), y = meanscore, fill=mediatypes)) +
+  geom_bar(stat="identity") +
+  scale_fill_manual(values=cols[order(df.plot$meanscore)]) +
+  labs(title = "Average Sentiment Score: Text including 'name'") + 
+  xlab('Media Type') + ylab('Average Score')</p>
+
+<h1>
+<a id="barplot-of-average-very-positive" class="anchor" href="#barplot-of-average-very-positive" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average very positive</h1>
+
+<p>mediatype_pos = ddply(scores, .(mediatype), summarise, mean_pos=mean(very.pos))
+mediatype_pos$mediatypes &lt;- reorder(mediatype_pos$mediatype, mediatype_pos$mean_pos)</p>
+
+<p>ggplot(mediatype_pos, aes(x = factor(mediatype), y = mean_pos, fill=mediatype)) +
+  geom_bar(stat="identity") +
+  scale_fill_manual(values=cols[order(df.plot$meanscore)]) +
+  labs(title = "Average Very Positive Sentiment Score: Text including 'name'") + 
+  xlab('Media Type') + ylab('Average Score')</p>
+
+<p>mediatype_neg = ddply(scores, .(mediatype), summarise, mean_neg=mean(very.neg))
+mediatype_neg$mediatypes &lt;- reorder(mediatype_neg$mediatype, mediatype_neg$mean_neg)</p>
+
+<p>ggplot(mediatype_neg, aes(x = factor(mediatype), y = mean_neg, fill=mediatype)) +
+  geom_bar(stat="identity") +
+  scale_fill_manual(values=cols[order(df.plot$meanscore)]) +
+  labs(title = "Average Very Negative Sentiment Score: Text including 'name'") + 
+  xlab('Media Type') + ylab('Average Score')</p>
+
+<h1></h1>
+
+<p>NEW</p>
+
+<p>new.df.bankA &lt;-data.frame(text=unlist(sapply(bankA.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
+new.df.bankB &lt;-data.frame(text=unlist(sapply(bankB.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
+new.df.bankC &lt;-data.frame(text=unlist(sapply(bankC.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
+new.df.bankD &lt;-data.frame(text=unlist(sapply(bankD.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
+new.df.name &lt;-data.frame(text=unlist(sapply(name.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
+new.df.internet &lt;-data.frame(text=unlist(sapply(internet.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)</p>
+
+<p>df.sent = new.df.bankA</p>
+
+<p>scores = score.sentiment(df.sent$text, pos, neg, .progress='text')</p>
+
+<p>library(tm)
+library(wordcloud)</p>
+
+<p>scores$text = as.character(scores$text)</p>
+
+<p>posIndices = which(as.numeric(scores$score) &gt; 1)
+negIndices = which(as.numeric(scores$score) &lt; -1)</p>
+
+<p>posPosts = scores[posIndices,2]
+negPosts = scores[negIndices,2]</p>
+
+<p>wordcloud(posPosts, min.freq = 5, colors=brewer.pal(8, "Dark2"))</p>
+
+<p>Global sentiment scores  (global_score = round( 100 * numpos / (numpos + numneg) )</p>
+
+<p>All Banks (df.1000): 59
+Bank A: 57
+Bank B: 56
+Bank C: 74
+Bank D: 50
+Text with “NAME”: 50
+Text with “INTERNET”: 55 -&gt;</p>
+
+<pre><code>
+### Analysis
+The word clusters below are a combination of all the words about a given bank. The next group of clusters are grouped into positive and negative clusters so we have more context to analyze them in and can draw more conclusions.
+#### Bank A
+![](http://i.imgur.com/LFu549B.png)
+#### Bank B
+![](http://i.imgur.com/D9Z00Ay.png)
+#### Bank C
+![](http://i.imgur.com/Z2HFK5N.png)
+#### Bank D
+http://i.imgur.com/xc9FNhD.png
+#### All Banks
+![](http://i.imgur.com/ULvKtEk.png)
+
+All the word clusters above are created from the sample data frame we created and for a word to appear, it had to have been used at least 50 times. As one would assume, each bank had topics that were specific to it, but there were some overarching themes for all four banks. The most prevalent words were “call” and phone” which appeared in all the banks’ word cluster with the exception being Bank D. The appearance of “call” and “phone” can be linked to the importance of customer service, especially with the banks’ call centers. With the increasing number of people utilizing the remote call centers, it is increasingly important for those people in the centers to be properly trained and held to the highest standard for their customer service. Banks should consider expanding their budgets for training those individuals to ensure the best customer experience and retain current clientele.
+As for the financial topics being discussed via social media, Bank D’s data was the most helpful providing areas such as “financial management”, “grants”, “advisers” while the remaining banks had more broad terms such as “credit card”. This may due to a policy Bank D has where they encourage their customers to leave specific comments so when doing analysis like this, it is easier to have more solid takeaways.
+
+
+The bank that stood out as being different in the word clusters was Bank D. While all other banks shared words “like” and “can,” Bank D showed more active words such as “swing,” “apply,” and “program.” Bank D may be more effective on a basic customer service level, therefore prompting tweets only when more complex issues come about.
+
+####Positive and Negative Word Clusters
+Bank A
+![](http://i.imgur.com/5yxwLGH.png)
+There are very few constructive positive takeaways we can have with Bank A’s positive sentiment word cluster. Although there are are words such as “personal”, “service”, “nice”, and “free” which all suggest a positive experience, the negative sentiment word cluster seems to carry more weight with words such as “customer”, “service”, “fraud”, “fucking”, “time”, and “dont”. Other negative words include “worst”, “scam”, and “lost” all which lead me to believe that the customers at Bank A believe their bank to be incompetent and have trust issues.
+
+Bank B
+![](http://i.imgur.com/d5Gp5hv.png)
+Bank B is very similar to Bank A in the respect that there seems to be trust issues, especially relating to security, with the customers and the bank. In the negative word cloud there are words like “card”, “scam”, “settlement”, “lose” which suggests that there is a lapse in the protocol relating to security for Bank B and possibly their banking cards. On the positive side, customer service seems to be a strong suit for Bank B as one of their most prominent positive words is “support”, “time”, and “team” leading me to believe that Bank B works very efficiently and succinctly in providing the necessary customer service.
+
+Bank C
+![](http://i.imgur.com/HSNiDW0.png)
+It appears that Bank C’s customers really enjoy whatever “free” services they offer, as well as overwhelming “support”. These positive reports are countered by people running into issues with their “card”, “account”, and “fraud”. Bank C’s problem lies not with their average worker, but with broader institutional framework that allows their customers’ accounts to be compromised.
+
+Bank D
+![](http://i.imgur.com/rfUCPCl.png)
+Bank D appears to be having some fundamental issues with aspects of banking like “money”, “card”, and “fraud”, but their customer service doesn’t seem to be an issue.
+
+All Banks
+Positive Word Cloud
+![](http://i.imgur.com/Q26IkaB.png)
+Negative Word Cloud
+![](http://i.imgur.com/8V93D77.png)
+With words relating to time appearing in the positive word cloud like “day” and “today”, one can infer that all the banks are very timely in the services they provide, whether they are customer services or financial. However, looking at the negative word cloud, customers do not seem pleased with the quality of service provided with words such as “money”, “customer”, “service”, “account”, and “card” appearing.
+
+####Sentiment Analysis
+The following table displays the sentiment analysis scores for all the banks on both Twitter and Facebook. In all the sentiment scores except for Bank B and C's average, Facebook and Twitter's signs were always the same indicating consistent reviews on the platforms but to varying degrees. If you look at All Banks' score for each sentiment score, Facebook's is nearly double that of Twitter demonstrating that people are more opinionated on Facebook than Twitter which makes sense because there is a character limit on Twitter so people can not go on rants like they could on Facebook. Although this is might be extreme, what companies can do to deal with this is to take the time to respond to the customers' posts either reinforcing the positive posts or attempting to amend the customer's issues.
+![](http://i.imgur.com/IfCf1q5.png)
+
+</code></pre>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/PeterABruno">PeterABruno</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
