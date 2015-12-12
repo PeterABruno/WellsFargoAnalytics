@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>Wellsfargoanalytics by PeterABruno</title>
+    <title>Wells Fargo Analytics by PeterABruno</title>
   </head>
 
   <body>
@@ -18,7 +18,7 @@
       <div class="inner">
 
         <header>
-          <h1>Wellsfargoanalytics</h1>
+          <h1>Wells Fargo Analytics</h1>
           <h2>Analysis of social media content</h2>
         </header>
 
@@ -155,278 +155,240 @@ wordcloud(names(freq), freq, colors=brewer.pal(8, "Dark2"))</p>
 
 <p>Sentiment Analysis Code</p>
 
-<h5>
-<a id="since-we-cant-find-a-great-package-in-r-im-going-to-use-an" class="anchor" href="#since-we-cant-find-a-great-package-in-r-im-going-to-use-an" aria-hidden="true"><span class="octicon octicon-link"></span></a>Since we can't find a great package in R, I'm going to use an</h5>
+<div class="highlight highlight-source-r"><pre><span class="pl-c">##### Since we can't find a great package in R, I'm going to use an</span>
+<span class="pl-c">##### example I found online to build our own</span>
+<span class="pl-c">##### Based on: http://www.ihub.co.ke/blogs/23216</span>
 
-<h5>
-<a id="example-i-found-online-to-build-our-own" class="anchor" href="#example-i-found-online-to-build-our-own" aria-hidden="true"><span class="octicon octicon-link"></span></a>example I found online to build our own</h5>
+<span class="pl-c">##### Only need to do once</span>
+<span class="pl-c">##### Download and upload: http://www.cs.uic.edu/~liub/FBS/opinion-lexicon-English.rar</span>
+<span class="pl-c">#####system('unrar e opinion-lexicon-English.rar')</span>
 
-<h5>
-<a id="based-on-httpwwwihubcokeblogs23216" class="anchor" href="#based-on-httpwwwihubcokeblogs23216" aria-hidden="true"><span class="octicon octicon-link"></span></a>Based on: <a href="http://www.ihub.co.ke/blogs/23216">http://www.ihub.co.ke/blogs/23216</a>
-</h5>
+<span class="pl-smi">pos</span> <span class="pl-k">&lt;-</span> scan(<span class="pl-s"><span class="pl-pds">'</span>positive-words.txt<span class="pl-pds">'</span></span>,<span class="pl-v">what</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>character<span class="pl-pds">'</span></span>,<span class="pl-v">comment.char</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>;<span class="pl-pds">'</span></span>)
+<span class="pl-smi">neg</span> <span class="pl-k">&lt;-</span> scan(<span class="pl-s"><span class="pl-pds">'</span>negative-words.txt<span class="pl-pds">'</span></span>,<span class="pl-v">what</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>character<span class="pl-pds">'</span></span>,<span class="pl-v">comment.char</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>;<span class="pl-pds">'</span></span>)
 
-<h5>
-<a id="only-need-to-do-once" class="anchor" href="#only-need-to-do-once" aria-hidden="true"><span class="octicon octicon-link"></span></a>Only need to do once</h5>
-
-<h5>
-<a id="download-and-upload-httpwwwcsuiceduliubfbsopinion-lexicon-englishrar" class="anchor" href="#download-and-upload-httpwwwcsuiceduliubfbsopinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download and upload: <a href="http://www.cs.uic.edu/%7Eliub/FBS/opinion-lexicon-English.rar">http://www.cs.uic.edu/~liub/FBS/opinion-lexicon-English.rar</a>
-</h5>
-
-<h5>
-<a id="systemunrar-e-opinion-lexicon-englishrar" class="anchor" href="#systemunrar-e-opinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>system('unrar e opinion-lexicon-English.rar')</h5>
-
-<p>pos &lt;- scan('positive-words.txt',what='character',comment.char=';')
-neg &lt;- scan('negative-words.txt',what='character',comment.char=';')</p>
-
-<p>score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
+<span class="pl-v">score.sentiment</span> <span class="pl-k">=</span> <span class="pl-k">function</span>(<span class="pl-smi">sentences</span>, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>none<span class="pl-pds">'</span></span>)
 {
-  require(plyr)
-  require(stringr)</p>
+  require(<span class="pl-smi">plyr</span>)
+  require(<span class="pl-smi">stringr</span>)
 
-<h5>
-<a id="we-got-a-vector-of-sentences-plyr-will-handle-a-list" class="anchor" href="#we-got-a-vector-of-sentences-plyr-will-handle-a-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>we got a vector of sentences. plyr will handle a list</h5>
+<span class="pl-c">##### we got a vector of sentences. plyr will handle a list</span>
+<span class="pl-c">##### or a vector as an "l" for us</span>
+<span class="pl-c">##### we want a simple array ("a") of scores back, so we use "l" + "a" + "ply" = "laply":</span>
+  <span class="pl-v">scores</span> <span class="pl-k">=</span> laply(<span class="pl-smi">sentences</span>, <span class="pl-k">function</span>(<span class="pl-smi">sentence</span>, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>) {
 
-<h5>
-<a id="or-a-vector-as-an-l-for-us" class="anchor" href="#or-a-vector-as-an-l-for-us" aria-hidden="true"><span class="octicon octicon-link"></span></a>or a vector as an "l" for us</h5>
+<span class="pl-c">##### clean up sentences with R's regex-driven global substitute, gsub():</span>
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span>[[:punct:]]<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span>[[:cntrl:]]<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\\</span>d+<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+<span class="pl-c">##### and convert to lower case:</span>
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> tolower(<span class="pl-smi">sentence</span>)
 
-<h5>
-<a id="we-want-a-simple-array-a-of-scores-back-so-we-use-l--a--ply--laply" class="anchor" href="#we-want-a-simple-array-a-of-scores-back-so-we-use-l--a--ply--laply" aria-hidden="true"><span class="octicon octicon-link"></span></a>we want a simple array ("a") of scores back, so we use "l" + "a" + "ply" = "laply":</h5>
+<span class="pl-c">##### split into words. str_split is in the stringr package</span>
+    <span class="pl-v">word.list</span> <span class="pl-k">=</span> str_split(<span class="pl-smi">sentence</span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\\</span>s+<span class="pl-pds">'</span></span>)
+    <span class="pl-c"># sometimes a list() is one level of hierarchy too much</span>
+    <span class="pl-v">words</span> <span class="pl-k">=</span> unlist(<span class="pl-smi">word.list</span>)
 
-<p>scores = laply(sentences, function(sentence, pos.words, neg.words) {</p>
+<span class="pl-c">##### compare our words to the dictionaries of positive &amp; negative terms</span>
+    <span class="pl-v">pos.matches</span> <span class="pl-k">=</span> match(<span class="pl-smi">words</span>, <span class="pl-smi">pos.words</span>)
+    <span class="pl-v">neg.matches</span> <span class="pl-k">=</span> match(<span class="pl-smi">words</span>, <span class="pl-smi">neg.words</span>)
 
-<h5>
-<a id="clean-up-sentences-with-rs-regex-driven-global-substitute-gsub" class="anchor" href="#clean-up-sentences-with-rs-regex-driven-global-substitute-gsub" aria-hidden="true"><span class="octicon octicon-link"></span></a>clean up sentences with R's regex-driven global substitute, gsub():</h5>
+<span class="pl-c">##### match() returns the position of the matched term or NA</span>
+<span class="pl-c">##### we just want a TRUE/FALSE:</span>
+    <span class="pl-v">pos.matches</span> <span class="pl-k">=</span> <span class="pl-k">!</span>is.na(<span class="pl-smi">pos.matches</span>)
+    <span class="pl-v">neg.matches</span> <span class="pl-k">=</span> <span class="pl-k">!</span>is.na(<span class="pl-smi">neg.matches</span>)
 
-<pre><code>sentence = gsub('[[:punct:]]', '', sentence)
-sentence = gsub('[[:cntrl:]]', '', sentence)
-sentence = gsub('\\d+', '', sentence)
-</code></pre>
+<span class="pl-c">##### and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():</span>
+    <span class="pl-v">score</span> <span class="pl-k">=</span> sum(<span class="pl-smi">pos.matches</span>) <span class="pl-k">-</span> sum(<span class="pl-smi">neg.matches</span>)
 
-<h5>
-<a id="and-convert-to-lower-case" class="anchor" href="#and-convert-to-lower-case" aria-hidden="true"><span class="octicon octicon-link"></span></a>and convert to lower case:</h5>
+    <span class="pl-k">return</span>(<span class="pl-smi">score</span>)
+  }, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span>.<span class="pl-smi">progress</span> )
 
-<pre><code>sentence = tolower(sentence)
-</code></pre>
+  <span class="pl-v">scores.df</span> <span class="pl-k">=</span> <span class="pl-k">data.frame</span>(<span class="pl-v">score</span><span class="pl-k">=</span><span class="pl-smi">scores</span>, <span class="pl-v">text</span><span class="pl-k">=</span><span class="pl-smi">sentences</span>)
+  <span class="pl-k">return</span>(<span class="pl-smi">scores.df</span>)
+}
 
-<h5>
-<a id="split-into-words-str_split-is-in-the-stringr-package" class="anchor" href="#split-into-words-str_split-is-in-the-stringr-package" aria-hidden="true"><span class="octicon octicon-link"></span></a>split into words. str_split is in the stringr package</h5>
+<span class="pl-c">#####breaks data frame into manageable size</span>
+<span class="pl-smi">df.1000</span><span class="pl-k">$</span><span class="pl-v">FullText</span> <span class="pl-k">=</span> as.character(<span class="pl-smi">df.1000</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>)
 
-<pre><code>word.list = str_split(sentence, '\\s+')
-# sometimes a list() is one level of hierarchy too much
-words = unlist(word.list)
-</code></pre>
+<span class="pl-c">#####subsets data frame into posts that mention Bank A, “name”, etc</span>
+<span class="pl-v">df.bankA</span> <span class="pl-k">=</span> <span class="pl-smi">df.1000</span>[<span class="pl-smi">bankA.idx</span>,]
+<span class="pl-v">df.bankB</span> <span class="pl-k">=</span> <span class="pl-smi">df.1000</span>[<span class="pl-smi">bankB.idx</span>,]
+<span class="pl-v">df.bankC</span> <span class="pl-k">=</span> <span class="pl-smi">df.1000</span>[<span class="pl-smi">bankC.idx</span>,]
+<span class="pl-v">df.bankD</span> <span class="pl-k">=</span> <span class="pl-smi">df.1000</span>[<span class="pl-smi">bankD.idx</span>,]
+<span class="pl-v">df.names</span> <span class="pl-k">=</span> <span class="pl-smi">df.1000</span>[<span class="pl-smi">name.idx</span>,]
+<span class="pl-v">df.internet</span> <span class="pl-k">=</span> <span class="pl-smi">df.1000</span>[<span class="pl-smi">internet.idx</span>,]
 
-<h5>
-<a id="compare-our-words-to-the-dictionaries-of-positive--negative-terms" class="anchor" href="#compare-our-words-to-the-dictionaries-of-positive--negative-terms" aria-hidden="true"><span class="octicon octicon-link"></span></a>compare our words to the dictionaries of positive &amp; negative terms</h5>
+<span class="pl-c">#####sets the data frame whose scores we will calculate</span>
+<span class="pl-v">df.sent</span> <span class="pl-k">=</span> <span class="pl-smi">df.names</span>
 
-<pre><code>pos.matches = match(words, pos.words)
-neg.matches = match(words, neg.words)
-</code></pre>
+<span class="pl-v">scores</span> <span class="pl-k">=</span> score.sentiment(<span class="pl-smi">df.sent</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>, <span class="pl-smi">pos</span>, <span class="pl-smi">neg</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">very.pos</span> <span class="pl-k">=</span> as.numeric(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span> <span class="pl-k">&gt;</span><span class="pl-k">=</span> <span class="pl-c1">2</span>)
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">very.neg</span> <span class="pl-k">=</span> as.numeric(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span> <span class="pl-k">&lt;</span><span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-c1">2</span>)
 
-<h5>
-<a id="match-returns-the-position-of-the-matched-term-or-na" class="anchor" href="#match-returns-the-position-of-the-matched-term-or-na" aria-hidden="true"><span class="octicon octicon-link"></span></a>match() returns the position of the matched term or NA</h5>
+<span class="pl-c">##### how many very positives and very negatives</span>
+<span class="pl-v">numpos</span> <span class="pl-k">=</span> sum(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">very.pos</span>)
+<span class="pl-v">numneg</span> <span class="pl-k">=</span> sum(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">very.neg</span>)
 
-<h5>
-<a id="we-just-want-a-truefalse" class="anchor" href="#we-just-want-a-truefalse" aria-hidden="true"><span class="octicon octicon-link"></span></a>we just want a TRUE/FALSE:</h5>
+<span class="pl-c">##### global score</span>
+<span class="pl-v">global_score</span> <span class="pl-k">=</span> round( <span class="pl-c1">100</span> <span class="pl-k">*</span> <span class="pl-smi">numpos</span> <span class="pl-k">/</span> (<span class="pl-smi">numpos</span> <span class="pl-k">+</span> <span class="pl-smi">numneg</span>) )
 
-<pre><code>pos.matches = !is.na(pos.matches)
-neg.matches = !is.na(neg.matches)
-</code></pre>
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">mediatype</span> <span class="pl-k">=</span> <span class="pl-smi">df.sent</span><span class="pl-k">$</span><span class="pl-smi">MediaType</span>
 
-<h5>
-<a id="and-conveniently-enough-truefalse-will-be-treated-as-10-by-sum" class="anchor" href="#and-conveniently-enough-truefalse-will-be-treated-as-10-by-sum" aria-hidden="true"><span class="octicon octicon-link"></span></a>and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():</h5>
+<span class="pl-c">##### colors</span>
+<span class="pl-v">cols</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>#7CAE00<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>#00BFC4<span class="pl-pds">"</span></span>)
+names(<span class="pl-smi">cols</span>) <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>twitter<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>facebook<span class="pl-pds">"</span></span>)</pre></div>
 
-<pre><code>score = sum(pos.matches) - sum(neg.matches)
+<div class="highlight highlight-source-r"><pre><span class="pl-c">##### boxplot</span>
+library(<span class="pl-smi">ggplot2</span>)
+ggplot(<span class="pl-smi">scores</span>, aes(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>, <span class="pl-v">y</span><span class="pl-k">=</span><span class="pl-smi">score</span>, <span class="pl-v">group</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>)) <span class="pl-k">+</span>
+  geom_boxplot(aes(<span class="pl-v">fill</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>)) <span class="pl-k">+</span>
+  scale_fill_manual(<span class="pl-v">values</span><span class="pl-k">=</span><span class="pl-smi">cols</span>) <span class="pl-k">+</span>
+  geom_jitter(<span class="pl-v">colour</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>gray40<span class="pl-pds">"</span></span>,<span class="pl-v">position</span><span class="pl-k">=</span>position_jitter(<span class="pl-v">width</span><span class="pl-k">=</span><span class="pl-c1">0.2</span>), <span class="pl-v">alpha</span><span class="pl-k">=</span><span class="pl-c1">0.3</span>) <span class="pl-k">+</span>
+  labs(<span class="pl-v">title</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Media Type's Sentiment Scores: Text including 'name'<span class="pl-pds">"</span></span>) <span class="pl-k">+</span> 
+  xlab(<span class="pl-s"><span class="pl-pds">'</span>Media Type<span class="pl-pds">'</span></span>) <span class="pl-k">+</span> ylab(<span class="pl-s"><span class="pl-pds">'</span>Sentiment Score<span class="pl-pds">'</span></span>)
 
-return(score)
-</code></pre>
+<span class="pl-c">##### barplot of average score</span>
+<span class="pl-v">meanscore</span> <span class="pl-k">=</span> tapply(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span>, <span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">mediatype</span>, <span class="pl-smi">mean</span>)
+<span class="pl-v">df.plot</span> <span class="pl-k">=</span> <span class="pl-k">data.frame</span>(<span class="pl-v">mediatype</span><span class="pl-k">=</span>names(<span class="pl-smi">meanscore</span>), <span class="pl-v">meanscore</span><span class="pl-k">=</span><span class="pl-smi">meanscore</span>)
+<span class="pl-smi">df.plot</span><span class="pl-k">$</span><span class="pl-smi">mediatypes</span> <span class="pl-k">&lt;-</span> reorder(<span class="pl-smi">df.plot</span><span class="pl-k">$</span><span class="pl-smi">mediatype</span>, <span class="pl-smi">df.plot</span><span class="pl-k">$</span><span class="pl-smi">meanscore</span>)
 
-<p>}, pos.words, neg.words, .progress=.progress )</p>
+ggplot(<span class="pl-smi">df.plot</span>, aes(<span class="pl-v">x</span> <span class="pl-k">=</span> <span class="pl-k">factor</span>(<span class="pl-smi">mediatypes</span>), <span class="pl-v">y</span> <span class="pl-k">=</span> <span class="pl-smi">meanscore</span>, <span class="pl-v">fill</span><span class="pl-k">=</span><span class="pl-smi">mediatypes</span>)) <span class="pl-k">+</span>
+  geom_bar(<span class="pl-v">stat</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>identity<span class="pl-pds">"</span></span>) <span class="pl-k">+</span>
+  scale_fill_manual(<span class="pl-v">values</span><span class="pl-k">=</span><span class="pl-smi">cols</span>[order(<span class="pl-smi">df.plot</span><span class="pl-k">$</span><span class="pl-smi">meanscore</span>)]) <span class="pl-k">+</span>
+  labs(<span class="pl-v">title</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Average Sentiment Score: Text including 'name'<span class="pl-pds">"</span></span>) <span class="pl-k">+</span> 
+  xlab(<span class="pl-s"><span class="pl-pds">'</span>Media Type<span class="pl-pds">'</span></span>) <span class="pl-k">+</span> ylab(<span class="pl-s"><span class="pl-pds">'</span>Average Score<span class="pl-pds">'</span></span>)
 
-<p>scores.df = data.frame(score=scores, text=sentences)
-  return(scores.df)
-}</p>
+<span class="pl-c">##### barplot of average very positive</span>
+<span class="pl-v">mediatype_pos</span> <span class="pl-k">=</span> ddply(<span class="pl-smi">scores</span>, .(<span class="pl-smi">mediatype</span>), <span class="pl-smi">summarise</span>, <span class="pl-v">mean_pos</span><span class="pl-k">=</span>mean(<span class="pl-smi">very.pos</span>))
+<span class="pl-smi">mediatype_pos</span><span class="pl-k">$</span><span class="pl-smi">mediatypes</span> <span class="pl-k">&lt;-</span> reorder(<span class="pl-smi">mediatype_pos</span><span class="pl-k">$</span><span class="pl-smi">mediatype</span>, <span class="pl-smi">mediatype_pos</span><span class="pl-k">$</span><span class="pl-smi">mean_pos</span>)
 
-<h5>
-<a id="breaks-data-frame-into-manageable-size" class="anchor" href="#breaks-data-frame-into-manageable-size" aria-hidden="true"><span class="octicon octicon-link"></span></a>breaks data frame into manageable size</h5>
+ggplot(<span class="pl-smi">mediatype_pos</span>, aes(<span class="pl-v">x</span> <span class="pl-k">=</span> <span class="pl-k">factor</span>(<span class="pl-smi">mediatype</span>), <span class="pl-v">y</span> <span class="pl-k">=</span> <span class="pl-smi">mean_pos</span>, <span class="pl-v">fill</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>)) <span class="pl-k">+</span>
+  geom_bar(<span class="pl-v">stat</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>identity<span class="pl-pds">"</span></span>) <span class="pl-k">+</span>
+  scale_fill_manual(<span class="pl-v">values</span><span class="pl-k">=</span><span class="pl-smi">cols</span>[order(<span class="pl-smi">df.plot</span><span class="pl-k">$</span><span class="pl-smi">meanscore</span>)]) <span class="pl-k">+</span>
+  labs(<span class="pl-v">title</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Average Very Positive Sentiment Score: Text including 'name'<span class="pl-pds">"</span></span>) <span class="pl-k">+</span> 
+  xlab(<span class="pl-s"><span class="pl-pds">'</span>Media Type<span class="pl-pds">'</span></span>) <span class="pl-k">+</span> ylab(<span class="pl-s"><span class="pl-pds">'</span>Average Score<span class="pl-pds">'</span></span>)
 
-<p>df.1000$FullText = as.character(df.1000$FullText)</p>
+<span class="pl-v">mediatype_neg</span> <span class="pl-k">=</span> ddply(<span class="pl-smi">scores</span>, .(<span class="pl-smi">mediatype</span>), <span class="pl-smi">summarise</span>, <span class="pl-v">mean_neg</span><span class="pl-k">=</span>mean(<span class="pl-smi">very.neg</span>))
+<span class="pl-smi">mediatype_neg</span><span class="pl-k">$</span><span class="pl-smi">mediatypes</span> <span class="pl-k">&lt;-</span> reorder(<span class="pl-smi">mediatype_neg</span><span class="pl-k">$</span><span class="pl-smi">mediatype</span>, <span class="pl-smi">mediatype_neg</span><span class="pl-k">$</span><span class="pl-smi">mean_neg</span>)
 
-<h5>
-<a id="subsets-data-frame-into-posts-that-mention-bank-a-name-etc" class="anchor" href="#subsets-data-frame-into-posts-that-mention-bank-a-name-etc" aria-hidden="true"><span class="octicon octicon-link"></span></a>subsets data frame into posts that mention Bank A, “name”, etc</h5>
-
-<p>df.bankA = df.1000[bankA.idx,]
-df.bankB = df.1000[bankB.idx,]
-df.bankC = df.1000[bankC.idx,]
-df.bankD = df.1000[bankD.idx,]
-df.names = df.1000[name.idx,]
-df.internet = df.1000[internet.idx,]</p>
-
-<h5>
-<a id="sets-the-data-frame-whose-scores-we-will-calculate" class="anchor" href="#sets-the-data-frame-whose-scores-we-will-calculate" aria-hidden="true"><span class="octicon octicon-link"></span></a>sets the data frame whose scores we will calculate</h5>
-
-<p>df.sent = df.names</p>
-
-<p>scores = score.sentiment(df.sent$FullText, pos, neg, .progress='text')
-scores$very.pos = as.numeric(scores$score &gt;= 2)
-scores$very.neg = as.numeric(scores$score &lt;= -2)</p>
-
-<h5>
-<a id="how-many-very-positives-and-very-negatives" class="anchor" href="#how-many-very-positives-and-very-negatives" aria-hidden="true"><span class="octicon octicon-link"></span></a>how many very positives and very negatives</h5>
-
-<p>numpos = sum(scores$very.pos)
-numneg = sum(scores$very.neg)</p>
-
-<h5>
-<a id="global-score" class="anchor" href="#global-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>global score</h5>
-
-<p>global_score = round( 100 * numpos / (numpos + numneg) )</p>
-
-<p>scores$mediatype = df.sent$MediaType</p>
-
-<h5>
-<a id="colors" class="anchor" href="#colors" aria-hidden="true"><span class="octicon octicon-link"></span></a>colors</h5>
-
-<p>cols = c("#7CAE00", "#00BFC4")
-names(cols) = c("twitter", "facebook")</p>
-
-<h5>
-<a id="boxplot" class="anchor" href="#boxplot" aria-hidden="true"><span class="octicon octicon-link"></span></a>boxplot</h5>
-
-<p>library(ggplot2)
-ggplot(scores, aes(x=mediatype, y=score, group=mediatype)) +
-  geom_boxplot(aes(fill=mediatype)) +
-  scale_fill_manual(values=cols) +
-  geom_jitter(colour="gray40",position=position_jitter(width=0.2), alpha=0.3) +
-  labs(title = "Media Type's Sentiment Scores: Text including 'name'") + 
-  xlab('Media Type') + ylab('Sentiment Score')</p>
-
-<h5>
-<a id="barplot-of-average-score" class="anchor" href="#barplot-of-average-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average score</h5>
-
-<p>meanscore = tapply(scores$score, scores$mediatype, mean)
-df.plot = data.frame(mediatype=names(meanscore), meanscore=meanscore)
-df.plot$mediatypes &lt;- reorder(df.plot$mediatype, df.plot$meanscore)</p>
-
-<p>ggplot(df.plot, aes(x = factor(mediatypes), y = meanscore, fill=mediatypes)) +
-  geom_bar(stat="identity") +
-  scale_fill_manual(values=cols[order(df.plot$meanscore)]) +
-  labs(title = "Average Sentiment Score: Text including 'name'") + 
-  xlab('Media Type') + ylab('Average Score')</p>
-
-<h5>
-<a id="barplot-of-average-very-positive" class="anchor" href="#barplot-of-average-very-positive" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average very positive</h5>
-
-<p>mediatype_pos = ddply(scores, .(mediatype), summarise, mean_pos=mean(very.pos))
-mediatype_pos$mediatypes &lt;- reorder(mediatype_pos$mediatype, mediatype_pos$mean_pos)</p>
-
-<p>ggplot(mediatype_pos, aes(x = factor(mediatype), y = mean_pos, fill=mediatype)) +
-  geom_bar(stat="identity") +
-  scale_fill_manual(values=cols[order(df.plot$meanscore)]) +
-  labs(title = "Average Very Positive Sentiment Score: Text including 'name'") + 
-  xlab('Media Type') + ylab('Average Score')</p>
-
-<p>mediatype_neg = ddply(scores, .(mediatype), summarise, mean_neg=mean(very.neg))
-mediatype_neg$mediatypes &lt;- reorder(mediatype_neg$mediatype, mediatype_neg$mean_neg)</p>
-
-<p>ggplot(mediatype_neg, aes(x = factor(mediatype), y = mean_neg, fill=mediatype)) +
-  geom_bar(stat="identity") +
-  scale_fill_manual(values=cols[order(df.plot$meanscore)]) +
-  labs(title = "Average Very Negative Sentiment Score: Text including 'name'") + 
-  xlab('Media Type') + ylab('Average Score')</p>
+ggplot(<span class="pl-smi">mediatype_neg</span>, aes(<span class="pl-v">x</span> <span class="pl-k">=</span> <span class="pl-k">factor</span>(<span class="pl-smi">mediatype</span>), <span class="pl-v">y</span> <span class="pl-k">=</span> <span class="pl-smi">mean_neg</span>, <span class="pl-v">fill</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>)) <span class="pl-k">+</span>
+  geom_bar(<span class="pl-v">stat</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>identity<span class="pl-pds">"</span></span>) <span class="pl-k">+</span>
+  scale_fill_manual(<span class="pl-v">values</span><span class="pl-k">=</span><span class="pl-smi">cols</span>[order(<span class="pl-smi">df.plot</span><span class="pl-k">$</span><span class="pl-smi">meanscore</span>)]) <span class="pl-k">+</span>
+  labs(<span class="pl-v">title</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Average Very Negative Sentiment Score: Text including 'name'<span class="pl-pds">"</span></span>) <span class="pl-k">+</span> 
+  xlab(<span class="pl-s"><span class="pl-pds">'</span>Media Type<span class="pl-pds">'</span></span>) <span class="pl-k">+</span> ylab(<span class="pl-s"><span class="pl-pds">'</span>Average Score<span class="pl-pds">'</span></span>)</pre></div>
 
 <h1></h1>
 
-<p>NEW</p>
+<h5>
+<a id="new" class="anchor" href="#new" aria-hidden="true"><span class="octicon octicon-link"></span></a>NEW</h5>
 
-<p>new.df.bankA &lt;-data.frame(text=unlist(sapply(bankA.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
-new.df.bankB &lt;-data.frame(text=unlist(sapply(bankB.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
-new.df.bankC &lt;-data.frame(text=unlist(sapply(bankC.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
-new.df.bankD &lt;-data.frame(text=unlist(sapply(bankD.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
-new.df.name &lt;-data.frame(text=unlist(sapply(name.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)
-new.df.internet &lt;-data.frame(text=unlist(sapply(internet.docs, <code>[[</code>, "content")), stringsAsFactors=FALSE)</p>
-
-<p>df.sent = new.df.bankA</p>
-
-<p>scores = score.sentiment(df.sent$text, pos, neg, .progress='text')</p>
-
-<p>library(tm)
-library(wordcloud)</p>
-
-<p>scores$text = as.character(scores$text)</p>
-
-<p>posIndices = which(as.numeric(scores$score) &gt; 1)
-negIndices = which(as.numeric(scores$score) &lt; -1)</p>
-
-<p>posPosts = scores[posIndices,2]
-negPosts = scores[negIndices,2]</p>
-
-<p>wordcloud(posPosts, min.freq = 5, colors=brewer.pal(8, "Dark2"))</p>
-
-<p>Global sentiment scores  (global_score = round( 100 * numpos / (numpos + numneg) )</p>
-
-<p>All Banks (df.1000): 59
-Bank A: 57
-Bank B: 56
-Bank C: 74
-Bank D: 50
-Text with “NAME”: 50
-Text with “INTERNET”: 55 
--&gt;</p>
-
-<pre><code>
-### Analysis
-The word clusters below are a combination of all the words about a given bank. The next group of clusters are grouped into positive and negative clusters so we have more context to analyze them in and can draw more conclusions.
-#### Bank A
-![](http://i.imgur.com/LFu549B.png)
-#### Bank B
-![](http://i.imgur.com/D9Z00Ay.png)
-#### Bank C
-![](http://i.imgur.com/Z2HFK5N.png)
-#### Bank D
-http://i.imgur.com/xc9FNhD.png
-#### All Banks
-![](http://i.imgur.com/ULvKtEk.png)
-
-All the word clusters above are created from the sample data frame we created and for a word to appear, it had to have been used at least 50 times. As one would assume, each bank had topics that were specific to it, but there were some overarching themes for all four banks. The most prevalent words were “call” and phone” which appeared in all the banks’ word cluster with the exception being Bank D. The appearance of “call” and “phone” can be linked to the importance of customer service, especially with the banks’ call centers. With the increasing number of people utilizing the remote call centers, it is increasingly important for those people in the centers to be properly trained and held to the highest standard for their customer service. Banks should consider expanding their budgets for training those individuals to ensure the best customer experience and retain current clientele.
-As for the financial topics being discussed via social media, Bank D’s data was the most helpful providing areas such as “financial management”, “grants”, “advisers” while the remaining banks had more broad terms such as “credit card”. This may due to a policy Bank D has where they encourage their customers to leave specific comments so when doing analysis like this, it is easier to have more solid takeaways.
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">new.df.bankA</span> <span class="pl-k">&lt;-</span><span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">bankA.docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+<span class="pl-smi">new.df.bankB</span> <span class="pl-k">&lt;-</span><span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">bankB.docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+<span class="pl-smi">new.df.bankC</span> <span class="pl-k">&lt;-</span><span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">bankC.docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+<span class="pl-smi">new.df.bankD</span> <span class="pl-k">&lt;-</span><span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">bankD.docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+<span class="pl-smi">new.df.name</span> <span class="pl-k">&lt;-</span><span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">name.docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+<span class="pl-smi">new.df.internet</span> <span class="pl-k">&lt;-</span><span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">internet.docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
 
 
-The bank that stood out as being different in the word clusters was Bank D. While all other banks shared words “like” and “can,” Bank D showed more active words such as “swing,” “apply,” and “program.” Bank D may be more effective on a basic customer service level, therefore prompting tweets only when more complex issues come about.
 
-####Positive and Negative Word Clusters
-Bank A
-![](http://i.imgur.com/5yxwLGH.png)
-There are very few constructive positive takeaways we can have with Bank A’s positive sentiment word cluster. Although there are are words such as “personal”, “service”, “nice”, and “free” which all suggest a positive experience, the negative sentiment word cluster seems to carry more weight with words such as “customer”, “service”, “fraud”, “fucking”, “time”, and “dont”. Other negative words include “worst”, “scam”, and “lost” all which lead me to believe that the customers at Bank A believe their bank to be incompetent and have trust issues.
+<span class="pl-v">df.sent</span> <span class="pl-k">=</span> <span class="pl-smi">new.df.bankA</span>
 
-Bank B
-![](http://i.imgur.com/d5Gp5hv.png)
-Bank B is very similar to Bank A in the respect that there seems to be trust issues, especially relating to security, with the customers and the bank. In the negative word cloud there are words like “card”, “scam”, “settlement”, “lose” which suggests that there is a lapse in the protocol relating to security for Bank B and possibly their banking cards. On the positive side, customer service seems to be a strong suit for Bank B as one of their most prominent positive words is “support”, “time”, and “team” leading me to believe that Bank B works very efficiently and succinctly in providing the necessary customer service.
+<span class="pl-v">scores</span> <span class="pl-k">=</span> score.sentiment(<span class="pl-smi">df.sent</span><span class="pl-k">$</span><span class="pl-smi">text</span>, <span class="pl-smi">pos</span>, <span class="pl-smi">neg</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)
 
-Bank C
-![](http://i.imgur.com/HSNiDW0.png)
-It appears that Bank C’s customers really enjoy whatever “free” services they offer, as well as overwhelming “support”. These positive reports are countered by people running into issues with their “card”, “account”, and “fraud”. Bank C’s problem lies not with their average worker, but with broader institutional framework that allows their customers’ accounts to be compromised.
+library(<span class="pl-smi">tm</span>)
+library(<span class="pl-smi">wordcloud</span>)
 
-Bank D
-![](http://i.imgur.com/rfUCPCl.png)
-Bank D appears to be having some fundamental issues with aspects of banking like “money”, “card”, and “fraud”, but their customer service doesn’t seem to be an issue.
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">text</span> <span class="pl-k">=</span> as.character(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">text</span>)
 
-All Banks
+<span class="pl-v">posIndices</span> <span class="pl-k">=</span> which(as.numeric(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span>) <span class="pl-k">&gt;</span> <span class="pl-c1">1</span>)
+<span class="pl-v">negIndices</span> <span class="pl-k">=</span> which(as.numeric(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span>) <span class="pl-k">&lt;</span> <span class="pl-k">-</span><span class="pl-c1">1</span>)
+
+<span class="pl-v">posPosts</span> <span class="pl-k">=</span> <span class="pl-smi">scores</span>[<span class="pl-smi">posIndices</span>,<span class="pl-c1">2</span>]
+<span class="pl-v">negPosts</span> <span class="pl-k">=</span> <span class="pl-smi">scores</span>[<span class="pl-smi">negIndices</span>,<span class="pl-c1">2</span>]
+
+wordcloud(<span class="pl-smi">posPosts</span>, <span class="pl-v">min.freq</span> <span class="pl-k">=</span> <span class="pl-c1">5</span>, <span class="pl-v">colors</span><span class="pl-k">=</span>brewer.pal(<span class="pl-c1">8</span>, <span class="pl-s"><span class="pl-pds">"</span>Dark2<span class="pl-pds">"</span></span>))
+
+
+<span class="pl-smi">Global</span> <span class="pl-smi">sentiment</span> scores  (<span class="pl-v">global_score</span> <span class="pl-k">=</span> round( <span class="pl-c1">100</span> <span class="pl-k">*</span> <span class="pl-smi">numpos</span> <span class="pl-k">/</span> (<span class="pl-smi">numpos</span> <span class="pl-k">+</span> <span class="pl-smi">numneg</span>) )
+
+<span class="pl-smi">All</span> Banks (<span class="pl-smi">df.1000</span>)<span class="pl-k">:</span> <span class="pl-c1">59</span>
+<span class="pl-smi">Bank</span> <span class="pl-smi">A</span><span class="pl-k">:</span> <span class="pl-c1">57</span>
+<span class="pl-smi">Bank</span> <span class="pl-smi">B</span><span class="pl-k">:</span> <span class="pl-c1">56</span>
+<span class="pl-smi">Bank</span> <span class="pl-smi">C</span><span class="pl-k">:</span> <span class="pl-c1">74</span>
+<span class="pl-smi">Bank</span> <span class="pl-smi">D</span><span class="pl-k">:</span> <span class="pl-c1">50</span>
+<span class="pl-smi">Text</span> <span class="pl-smi">with</span> “<span class="pl-smi">NAME</span>”<span class="pl-k">:</span> <span class="pl-c1">50</span>
+<span class="pl-smi">Text</span> <span class="pl-smi">with</span> “<span class="pl-smi">INTERNET</span>”<span class="pl-k">:</span> <span class="pl-c1">55</span> </pre></div>
+
+<h3>
+<a id="analysis" class="anchor" href="#analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Analysis</h3>
+
+<p>The word clusters below are a combination of all the words about a given bank. The next group of clusters are grouped into positive and negative clusters so we have more context to analyze them in and can draw more conclusions.</p>
+
+<h4>
+<a id="bank-a" class="anchor" href="#bank-a" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bank A</h4>
+
+<p><img src="http://i.imgur.com/LFu549B.png" alt=""></p>
+
+<h4>
+<a id="bank-b" class="anchor" href="#bank-b" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bank B</h4>
+
+<p><img src="http://i.imgur.com/D9Z00Ay.png" alt=""></p>
+
+<h4>
+<a id="bank-c" class="anchor" href="#bank-c" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bank C</h4>
+
+<p><img src="http://i.imgur.com/Z2HFK5N.png" alt=""></p>
+
+<h4>
+<a id="bank-d" class="anchor" href="#bank-d" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bank D</h4>
+
+<p><a href="http://i.imgur.com/xc9FNhD.png">http://i.imgur.com/xc9FNhD.png</a></p>
+
+<h4>
+<a id="all-banks" class="anchor" href="#all-banks" aria-hidden="true"><span class="octicon octicon-link"></span></a>All Banks</h4>
+
+<p><img src="http://i.imgur.com/ULvKtEk.png" alt=""></p>
+
+<p>All the word clusters above are created from the sample data frame we created and for a word to appear, it had to have been used at least 50 times. As one would assume, each bank had topics that were specific to it, but there were some overarching themes for all four banks. The most prevalent words were “call” and phone” which appeared in all the banks’ word cluster with the exception being Bank D. The appearance of “call” and “phone” can be linked to the importance of customer service, especially with the banks’ call centers. With the increasing number of people utilizing the remote call centers, it is increasingly important for those people in the centers to be properly trained and held to the highest standard for their customer service. Banks should consider expanding their budgets for training those individuals to ensure the best customer experience and retain current clientele.
+As for the financial topics being discussed via social media, Bank D’s data was the most helpful providing areas such as “financial management”, “grants”, “advisers” while the remaining banks had more broad terms such as “credit card”. This may due to a policy Bank D has where they encourage their customers to leave specific comments so when doing analysis like this, it is easier to have more solid takeaways.</p>
+
+<p>The bank that stood out as being different in the word clusters was Bank D. While all other banks shared words “like” and “can,” Bank D showed more active words such as “swing,” “apply,” and “program.” Bank D may be more effective on a basic customer service level, therefore prompting tweets only when more complex issues come about.</p>
+
+<h4>
+<a id="positive-and-negative-word-clusters" class="anchor" href="#positive-and-negative-word-clusters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Positive and Negative Word Clusters</h4>
+
+<p>Bank A
+<img src="http://i.imgur.com/5yxwLGH.png" alt="">
+There are very few constructive positive takeaways we can have with Bank A’s positive sentiment word cluster. Although there are are words such as “personal”, “service”, “nice”, and “free” which all suggest a positive experience, the negative sentiment word cluster seems to carry more weight with words such as “customer”, “service”, “fraud”, “fucking”, “time”, and “dont”. Other negative words include “worst”, “scam”, and “lost” all which lead me to believe that the customers at Bank A believe their bank to be incompetent and have trust issues.</p>
+
+<p>Bank B
+<img src="http://i.imgur.com/d5Gp5hv.png" alt="">
+Bank B is very similar to Bank A in the respect that there seems to be trust issues, especially relating to security, with the customers and the bank. In the negative word cloud there are words like “card”, “scam”, “settlement”, “lose” which suggests that there is a lapse in the protocol relating to security for Bank B and possibly their banking cards. On the positive side, customer service seems to be a strong suit for Bank B as one of their most prominent positive words is “support”, “time”, and “team” leading me to believe that Bank B works very efficiently and succinctly in providing the necessary customer service.</p>
+
+<p>Bank C
+<img src="http://i.imgur.com/HSNiDW0.png" alt="">
+It appears that Bank C’s customers really enjoy whatever “free” services they offer, as well as overwhelming “support”. These positive reports are countered by people running into issues with their “card”, “account”, and “fraud”. Bank C’s problem lies not with their average worker, but with broader institutional framework that allows their customers’ accounts to be compromised.</p>
+
+<p>Bank D
+<img src="http://i.imgur.com/rfUCPCl.png" alt="">
+Bank D appears to be having some fundamental issues with aspects of banking like “money”, “card”, and “fraud”, but their customer service doesn’t seem to be an issue.</p>
+
+<p>All Banks
 Positive Word Cloud
-![](http://i.imgur.com/Q26IkaB.png)
+<img src="http://i.imgur.com/Q26IkaB.png" alt="">
 Negative Word Cloud
-![](http://i.imgur.com/8V93D77.png)
-With words relating to time appearing in the positive word cloud like “day” and “today”, one can infer that all the banks are very timely in the services they provide, whether they are customer services or financial. However, looking at the negative word cloud, customers do not seem pleased with the quality of service provided with words such as “money”, “customer”, “service”, “account”, and “card” appearing.
+<img src="http://i.imgur.com/8V93D77.png" alt="">
+With words relating to time appearing in the positive word cloud like “day” and “today”, one can infer that all the banks are very timely in the services they provide, whether they are customer services or financial. However, looking at the negative word cloud, customers do not seem pleased with the quality of service provided with words such as “money”, “customer”, “service”, “account”, and “card” appearing.</p>
 
-####Sentiment Analysis
-The following table displays the sentiment analysis scores for all the banks on both Twitter and Facebook. In all the sentiment scores except for Bank B and C's average, Facebook and Twitter's signs were always the same indicating consistent reviews on the platforms but to varying degrees. If you look at All Banks' score for each sentiment score, Facebook's is nearly double that of Twitter demonstrating that people are more opinionated on Facebook than Twitter which makes sense because there is a character limit on Twitter so people can not go on rants like they could on Facebook. Although this is might be extreme, what companies can do to deal with this is to take the time to respond to the customers' posts either reinforcing the positive posts or attempting to amend the customer's issues.
-![](http://i.imgur.com/IfCf1q5.png)
+<h4>
+<a id="sentiment-analysis" class="anchor" href="#sentiment-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sentiment Analysis</h4>
 
-</code></pre>
+<p>The following table displays the sentiment analysis scores for all the banks on both Twitter and Facebook. In all the sentiment scores except for Bank B and C's average, Facebook and Twitter's signs were always the same indicating consistent reviews on the platforms but to varying degrees. If you look at All Banks' score for each sentiment score, Facebook's is nearly double that of Twitter demonstrating that people are more opinionated on Facebook than Twitter which makes sense because there is a character limit on Twitter so people can not go on rants like they could on Facebook. Although this is might be extreme, what companies can do to deal with this is to take the time to respond to the customers' posts either reinforcing the positive posts or attempting to amend the customer's issues.
+<img src="http://i.imgur.com/IfCf1q5.png" alt=""></p>
         </section>
 
         <footer>
-          Wellsfargoanalytics is maintained by <a href="https://github.com/PeterABruno">PeterABruno</a><br>
+          Wells Fargo Analytics is maintained by <a href="https://github.com/PeterABruno">PeterABruno</a><br>
           This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
         </footer>
 
