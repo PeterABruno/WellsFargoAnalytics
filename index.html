@@ -155,25 +155,25 @@ wordcloud(names(freq), freq, colors=brewer.pal(8, "Dark2"))</p>
 
 <p>Sentiment Analysis Code</p>
 
-<h1>
-<a id="since-we-cant-find-a-great-package-in-r-im-going-to-use-an" class="anchor" href="#since-we-cant-find-a-great-package-in-r-im-going-to-use-an" aria-hidden="true"><span class="octicon octicon-link"></span></a>Since we can't find a great package in R, I'm going to use an</h1>
+<h5>
+<a id="since-we-cant-find-a-great-package-in-r-im-going-to-use-an" class="anchor" href="#since-we-cant-find-a-great-package-in-r-im-going-to-use-an" aria-hidden="true"><span class="octicon octicon-link"></span></a>Since we can't find a great package in R, I'm going to use an</h5>
 
-<h1>
-<a id="example-i-found-online-to-build-our-own" class="anchor" href="#example-i-found-online-to-build-our-own" aria-hidden="true"><span class="octicon octicon-link"></span></a>example I found online to build our own</h1>
+<h5>
+<a id="example-i-found-online-to-build-our-own" class="anchor" href="#example-i-found-online-to-build-our-own" aria-hidden="true"><span class="octicon octicon-link"></span></a>example I found online to build our own</h5>
 
-<h1>
+<h5>
 <a id="based-on-httpwwwihubcokeblogs23216" class="anchor" href="#based-on-httpwwwihubcokeblogs23216" aria-hidden="true"><span class="octicon octicon-link"></span></a>Based on: <a href="http://www.ihub.co.ke/blogs/23216">http://www.ihub.co.ke/blogs/23216</a>
-</h1>
+</h5>
 
-<h1>
-<a id="only-need-to-do-once" class="anchor" href="#only-need-to-do-once" aria-hidden="true"><span class="octicon octicon-link"></span></a>Only need to do once</h1>
+<h5>
+<a id="only-need-to-do-once" class="anchor" href="#only-need-to-do-once" aria-hidden="true"><span class="octicon octicon-link"></span></a>Only need to do once</h5>
 
-<h1>
+<h5>
 <a id="download-and-upload-httpwwwcsuiceduliubfbsopinion-lexicon-englishrar" class="anchor" href="#download-and-upload-httpwwwcsuiceduliubfbsopinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download and upload: <a href="http://www.cs.uic.edu/%7Eliub/FBS/opinion-lexicon-English.rar">http://www.cs.uic.edu/~liub/FBS/opinion-lexicon-English.rar</a>
-</h1>
+</h5>
 
-<h1>
-<a id="systemunrar-e-opinion-lexicon-englishrar" class="anchor" href="#systemunrar-e-opinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>system('unrar e opinion-lexicon-English.rar')</h1>
+<h5>
+<a id="systemunrar-e-opinion-lexicon-englishrar" class="anchor" href="#systemunrar-e-opinion-lexicon-englishrar" aria-hidden="true"><span class="octicon octicon-link"></span></a>system('unrar e opinion-lexicon-English.rar')</h5>
 
 <p>pos &lt;- scan('positive-words.txt',what='character',comment.char=';')
 neg &lt;- scan('negative-words.txt',what='character',comment.char=';')</p>
@@ -183,35 +183,60 @@ neg &lt;- scan('negative-words.txt',what='character',comment.char=';')</p>
   require(plyr)
   require(stringr)</p>
 
-<p># we got a vector of sentences. plyr will handle a list
-  # or a vector as an "l" for us
-  # we want a simple array ("a") of scores back, so we use 
-  # "l" + "a" + "ply" = "laply":
-  scores = laply(sentences, function(sentence, pos.words, neg.words) {</p>
+<h5>
+<a id="we-got-a-vector-of-sentences-plyr-will-handle-a-list" class="anchor" href="#we-got-a-vector-of-sentences-plyr-will-handle-a-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>we got a vector of sentences. plyr will handle a list</h5>
 
-<pre><code># clean up sentences with R's regex-driven global substitute, gsub():
-sentence = gsub('[[:punct:]]', '', sentence)
+<h5>
+<a id="or-a-vector-as-an-l-for-us" class="anchor" href="#or-a-vector-as-an-l-for-us" aria-hidden="true"><span class="octicon octicon-link"></span></a>or a vector as an "l" for us</h5>
+
+<h5>
+<a id="we-want-a-simple-array-a-of-scores-back-so-we-use-l--a--ply--laply" class="anchor" href="#we-want-a-simple-array-a-of-scores-back-so-we-use-l--a--ply--laply" aria-hidden="true"><span class="octicon octicon-link"></span></a>we want a simple array ("a") of scores back, so we use "l" + "a" + "ply" = "laply":</h5>
+
+<p>scores = laply(sentences, function(sentence, pos.words, neg.words) {</p>
+
+<h5>
+<a id="clean-up-sentences-with-rs-regex-driven-global-substitute-gsub" class="anchor" href="#clean-up-sentences-with-rs-regex-driven-global-substitute-gsub" aria-hidden="true"><span class="octicon octicon-link"></span></a>clean up sentences with R's regex-driven global substitute, gsub():</h5>
+
+<pre><code>sentence = gsub('[[:punct:]]', '', sentence)
 sentence = gsub('[[:cntrl:]]', '', sentence)
 sentence = gsub('\\d+', '', sentence)
-# and convert to lower case:
-sentence = tolower(sentence)
+</code></pre>
 
-# split into words. str_split is in the stringr package
-word.list = str_split(sentence, '\\s+')
+<h5>
+<a id="and-convert-to-lower-case" class="anchor" href="#and-convert-to-lower-case" aria-hidden="true"><span class="octicon octicon-link"></span></a>and convert to lower case:</h5>
+
+<pre><code>sentence = tolower(sentence)
+</code></pre>
+
+<h5>
+<a id="split-into-words-str_split-is-in-the-stringr-package" class="anchor" href="#split-into-words-str_split-is-in-the-stringr-package" aria-hidden="true"><span class="octicon octicon-link"></span></a>split into words. str_split is in the stringr package</h5>
+
+<pre><code>word.list = str_split(sentence, '\\s+')
 # sometimes a list() is one level of hierarchy too much
 words = unlist(word.list)
+</code></pre>
 
-# compare our words to the dictionaries of positive &amp; negative terms
-pos.matches = match(words, pos.words)
+<h5>
+<a id="compare-our-words-to-the-dictionaries-of-positive--negative-terms" class="anchor" href="#compare-our-words-to-the-dictionaries-of-positive--negative-terms" aria-hidden="true"><span class="octicon octicon-link"></span></a>compare our words to the dictionaries of positive &amp; negative terms</h5>
+
+<pre><code>pos.matches = match(words, pos.words)
 neg.matches = match(words, neg.words)
+</code></pre>
 
-# match() returns the position of the matched term or NA
-# we just want a TRUE/FALSE:
-pos.matches = !is.na(pos.matches)
+<h5>
+<a id="match-returns-the-position-of-the-matched-term-or-na" class="anchor" href="#match-returns-the-position-of-the-matched-term-or-na" aria-hidden="true"><span class="octicon octicon-link"></span></a>match() returns the position of the matched term or NA</h5>
+
+<h5>
+<a id="we-just-want-a-truefalse" class="anchor" href="#we-just-want-a-truefalse" aria-hidden="true"><span class="octicon octicon-link"></span></a>we just want a TRUE/FALSE:</h5>
+
+<pre><code>pos.matches = !is.na(pos.matches)
 neg.matches = !is.na(neg.matches)
+</code></pre>
 
-# and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():
-score = sum(pos.matches) - sum(neg.matches)
+<h5>
+<a id="and-conveniently-enough-truefalse-will-be-treated-as-10-by-sum" class="anchor" href="#and-conveniently-enough-truefalse-will-be-treated-as-10-by-sum" aria-hidden="true"><span class="octicon octicon-link"></span></a>and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():</h5>
+
+<pre><code>score = sum(pos.matches) - sum(neg.matches)
 
 return(score)
 </code></pre>
@@ -222,13 +247,13 @@ return(score)
   return(scores.df)
 }</p>
 
-<h1>
-<a id="breaks-data-frame-into-manageable-size" class="anchor" href="#breaks-data-frame-into-manageable-size" aria-hidden="true"><span class="octicon octicon-link"></span></a>breaks data frame into manageable size</h1>
+<h5>
+<a id="breaks-data-frame-into-manageable-size" class="anchor" href="#breaks-data-frame-into-manageable-size" aria-hidden="true"><span class="octicon octicon-link"></span></a>breaks data frame into manageable size</h5>
 
 <p>df.1000$FullText = as.character(df.1000$FullText)</p>
 
-<h1>
-<a id="subsets-data-frame-into-posts-that-mention-bank-a-name-etc" class="anchor" href="#subsets-data-frame-into-posts-that-mention-bank-a-name-etc" aria-hidden="true"><span class="octicon octicon-link"></span></a>subsets data frame into posts that mention Bank A, “name”, etc</h1>
+<h5>
+<a id="subsets-data-frame-into-posts-that-mention-bank-a-name-etc" class="anchor" href="#subsets-data-frame-into-posts-that-mention-bank-a-name-etc" aria-hidden="true"><span class="octicon octicon-link"></span></a>subsets data frame into posts that mention Bank A, “name”, etc</h5>
 
 <p>df.bankA = df.1000[bankA.idx,]
 df.bankB = df.1000[bankB.idx,]
@@ -237,8 +262,8 @@ df.bankD = df.1000[bankD.idx,]
 df.names = df.1000[name.idx,]
 df.internet = df.1000[internet.idx,]</p>
 
-<h1>
-<a id="sets-the-data-frame-whose-scores-we-will-calculate" class="anchor" href="#sets-the-data-frame-whose-scores-we-will-calculate" aria-hidden="true"><span class="octicon octicon-link"></span></a>sets the data frame whose scores we will calculate</h1>
+<h5>
+<a id="sets-the-data-frame-whose-scores-we-will-calculate" class="anchor" href="#sets-the-data-frame-whose-scores-we-will-calculate" aria-hidden="true"><span class="octicon octicon-link"></span></a>sets the data frame whose scores we will calculate</h5>
 
 <p>df.sent = df.names</p>
 
@@ -246,27 +271,27 @@ df.internet = df.1000[internet.idx,]</p>
 scores$very.pos = as.numeric(scores$score &gt;= 2)
 scores$very.neg = as.numeric(scores$score &lt;= -2)</p>
 
-<h1>
-<a id="how-many-very-positives-and-very-negatives" class="anchor" href="#how-many-very-positives-and-very-negatives" aria-hidden="true"><span class="octicon octicon-link"></span></a>how many very positives and very negatives</h1>
+<h5>
+<a id="how-many-very-positives-and-very-negatives" class="anchor" href="#how-many-very-positives-and-very-negatives" aria-hidden="true"><span class="octicon octicon-link"></span></a>how many very positives and very negatives</h5>
 
 <p>numpos = sum(scores$very.pos)
 numneg = sum(scores$very.neg)</p>
 
-<h1>
-<a id="global-score" class="anchor" href="#global-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>global score</h1>
+<h5>
+<a id="global-score" class="anchor" href="#global-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>global score</h5>
 
 <p>global_score = round( 100 * numpos / (numpos + numneg) )</p>
 
 <p>scores$mediatype = df.sent$MediaType</p>
 
-<h1>
-<a id="colors" class="anchor" href="#colors" aria-hidden="true"><span class="octicon octicon-link"></span></a>colors</h1>
+<h5>
+<a id="colors" class="anchor" href="#colors" aria-hidden="true"><span class="octicon octicon-link"></span></a>colors</h5>
 
 <p>cols = c("#7CAE00", "#00BFC4")
 names(cols) = c("twitter", "facebook")</p>
 
-<h1>
-<a id="boxplot" class="anchor" href="#boxplot" aria-hidden="true"><span class="octicon octicon-link"></span></a>boxplot</h1>
+<h5>
+<a id="boxplot" class="anchor" href="#boxplot" aria-hidden="true"><span class="octicon octicon-link"></span></a>boxplot</h5>
 
 <p>library(ggplot2)
 ggplot(scores, aes(x=mediatype, y=score, group=mediatype)) +
@@ -276,8 +301,8 @@ ggplot(scores, aes(x=mediatype, y=score, group=mediatype)) +
   labs(title = "Media Type's Sentiment Scores: Text including 'name'") + 
   xlab('Media Type') + ylab('Sentiment Score')</p>
 
-<h1>
-<a id="barplot-of-average-score" class="anchor" href="#barplot-of-average-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average score</h1>
+<h5>
+<a id="barplot-of-average-score" class="anchor" href="#barplot-of-average-score" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average score</h5>
 
 <p>meanscore = tapply(scores$score, scores$mediatype, mean)
 df.plot = data.frame(mediatype=names(meanscore), meanscore=meanscore)
@@ -289,8 +314,8 @@ df.plot$mediatypes &lt;- reorder(df.plot$mediatype, df.plot$meanscore)</p>
   labs(title = "Average Sentiment Score: Text including 'name'") + 
   xlab('Media Type') + ylab('Average Score')</p>
 
-<h1>
-<a id="barplot-of-average-very-positive" class="anchor" href="#barplot-of-average-very-positive" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average very positive</h1>
+<h5>
+<a id="barplot-of-average-very-positive" class="anchor" href="#barplot-of-average-very-positive" aria-hidden="true"><span class="octicon octicon-link"></span></a>barplot of average very positive</h5>
 
 <p>mediatype_pos = ddply(scores, .(mediatype), summarise, mean_pos=mean(very.pos))
 mediatype_pos$mediatypes &lt;- reorder(mediatype_pos$mediatype, mediatype_pos$mean_pos)</p>
@@ -346,7 +371,8 @@ Bank B: 56
 Bank C: 74
 Bank D: 50
 Text with “NAME”: 50
-Text with “INTERNET”: 55 -&gt;</p>
+Text with “INTERNET”: 55 
+-&gt;</p>
 
 <pre><code>
 ### Analysis
